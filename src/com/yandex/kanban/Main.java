@@ -1,3 +1,11 @@
+package com.yandex.kanban;
+
+import com.yandex.kanban.model.Epic;
+import com.yandex.kanban.model.SubTask;
+import com.yandex.kanban.model.Task;
+import com.yandex.kanban.model.TaskStatus;
+import com.yandex.kanban.service.TaskManager;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -12,16 +20,16 @@ public class Main {
         Epic epic1 = new Epic("стройка", "спланировать весь цикл постройки дома");
         taskManager.createEpic(epic1);
 
-        SubTask subTask1 = new SubTask("проект", "заказать проет");
-        SubTask subTask2 = new SubTask("смета", "посчитать смету");
-        taskManager.createSubTask(subTask1, epic1);
-        taskManager.createSubTask(subTask2, epic1);
+        SubTask subTask1 = new SubTask("проект", "заказать проет", epic1.getId());
+        SubTask subTask2 = new SubTask("смета", "посчитать смету", epic1.getId());
+        taskManager.createSubTask(subTask1);
+        taskManager.createSubTask(subTask2);
 
         Epic epic2 = new Epic("отпуск", "спланировать отпуск");
         taskManager.createEpic(epic2);
 
-        SubTask subTask3 = new SubTask("путевка", "выбрать тур в тайланд");
-        taskManager.createSubTask(subTask3, epic2);
+        SubTask subTask3 = new SubTask("путевка", "выбрать тур в тайланд", epic2.getId());
+        taskManager.createSubTask(subTask3);
 
         taskManager.printAllTask();
         System.out.println();

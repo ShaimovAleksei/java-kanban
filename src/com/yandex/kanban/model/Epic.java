@@ -1,6 +1,8 @@
+package com.yandex.kanban.model;
+
 import java.util.ArrayList;
 
-public class Epic extends Task{
+public class Epic extends Task {
     private ArrayList<Integer> subTaskIDs;
 
     public Epic(String name, String description) {
@@ -28,6 +30,7 @@ public class Epic extends Task{
     }
 
     public void removeSubTaskId(int id) {
-        subTaskIDs.remove(id);
+        Integer parseId = Integer.valueOf(id);
+        subTaskIDs.remove(parseId);
     }
 }

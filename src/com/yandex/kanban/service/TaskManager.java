@@ -1,3 +1,9 @@
+package com.yandex.kanban.service;
+import com.yandex.kanban.model.TaskStatus;
+import com.yandex.kanban.model.Epic;
+import com.yandex.kanban.model.SubTask;
+import com.yandex.kanban.model.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -47,12 +53,12 @@ public class TaskManager {
         return  listSubTask;
     }
 
-    public void createSubTask(SubTask subTask,Epic epic){
+    public void createSubTask(SubTask subTask){
         subTask.setId(taskManagerID++);
-        subTask.setEpicID(epic.getId());
-        epic.addSubTaskID(subTask.getId());
+       // subTask.setEpicID(epic.getId());
+        epicList.get(subTask.getEpicID()).addSubTaskID(subTask.getId());
         subTaskList.put(subTask.getId(),subTask);
-        updateEpicStatus(epic.getId());
+        updateEpicStatus(subTask.getEpicID());
     }
 
     public void deleteAllSubTask(){
@@ -71,7 +77,8 @@ public class TaskManager {
     public void deleteSubTaskById(int id){
         int epicId = subTaskList.get(id).getEpicID();
         Epic epic = epicList.get(epicId);
-        epic.getSubTaskID().remove(id);
+        //epic.getSubTaskID().remove(id);
+        epic.removeSubTaskId(id);
         subTaskList.remove(id);
         updateEpicStatus(epic.getId());
 
@@ -103,12 +110,11 @@ public class TaskManager {
         return epicList.get(id);
     }
 
-    public void deleteEpicById(int id){
-        epicList.remove(id);
-        ArrayList<SubTask> newSubTasksList = new ArrayList<>(subTaskList.values());
-        for (SubTask subTask : newSubTasksList) {
-            if (subTask.getEpicID() == id){
-                subTaskList.remove((subTask.getId()));
+    public void deleteEpicById(int id) {
+        Epic epic = epicList.remove(id);
+        if (epic != null) {
+            for (int subtaskId : epic.getSubTaskID()) {
+                subTaskList.remove(subtaskId);
             }
         }
     }
