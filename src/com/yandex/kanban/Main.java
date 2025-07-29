@@ -6,7 +6,11 @@ import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 import com.yandex.kanban.service.InMemoryTaskManager;
 import com.yandex.kanban.service.Managers;
+import com.yandex.kanban.service.InMemoryHistoryManager;
 import com.yandex.kanban.service.TaskManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
@@ -33,7 +37,7 @@ public class Main {
         SubTask subTask3 = new SubTask("путевка", "выбрать тур в тайланд", epic2.getId());
         manager.createSubTask(subTask3);
 
-        //manager.printAllTask();
+        manager.printAllTask();
         System.out.println();
         System.out.println();
 
@@ -45,14 +49,14 @@ public class Main {
         manager.updateSubtask(subTask1);
         manager.updateSubtask(subTask2);
 
-        //manager.printAllTask();
+        manager.printAllTask();
         System.out.println();
         System.out.println();
 
         manager.deleteTaskById(task1.getId());
         manager.deleteEpicById(epic2.getId());
 
-        //manager.printAllTask();
+        manager.printAllTask();
 
         System.out.println(manager.getTaskById(task2.getId()));
         System.out.println(manager.getEpicById(epic1.getId()));
@@ -60,6 +64,9 @@ public class Main {
         System.out.println(manager.getSubTaskById(subTask1.getId()));
 
         manager.printHistory();
+
+
+
         System.out.println();
         System.out.println();
 
@@ -69,6 +76,7 @@ public class Main {
         System.out.println();
 
         manager.printHistory();
+
     }
 
 }

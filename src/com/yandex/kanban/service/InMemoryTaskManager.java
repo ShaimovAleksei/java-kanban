@@ -13,13 +13,14 @@ public class InMemoryTaskManager implements TaskManager {
     private HashMap<Integer, Epic> epicList;
     private HashMap<Integer, SubTask> subTaskList;
     private int taskManagerID = 0;
-    private  List<Integer> listAllIdToHistory;
+    private  HistoryManager historyManager;
 
-    public InMemoryTaskManager() {
+
+    public InMemoryTaskManager(HistoryManager historyManager) {
         taskList = new HashMap<>();
         epicList = new HashMap<>();
         subTaskList = new HashMap<>();
-        listAllIdToHistory = new ArrayList<>();
+        this.historyManager = historyManager;
     }
 
     @Override
@@ -42,9 +43,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        listAllIdToHistory.add(id);
-        checkSizeListAllId();
-        return taskList.get(id);
+        Task task = taskList.get(id);
+        historyManager.add(task);
+        return task;
     }
 
     @Override
@@ -86,9 +87,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public SubTask getSubTaskById(int id){
-        listAllIdToHistory.add(id);
-        checkSizeListAllId();
-        return subTaskList.get(id);
+        SubTask subTask = subTaskList.get(id);
+        historyManager.add(subTask);
+        return subTask;
     }
 
     @Override
@@ -129,9 +130,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic getEpicById(int id){
-        listAllIdToHistory.add(id);
-        checkSizeListAllId();
-        return epicList.get(id);
+        Epic epic = epicList.get(id);
+        historyManager.add(epic);
+        return epic;
     }
 
     @Override
@@ -208,30 +209,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getHistory() {
-        List<Task> history = new ArrayList<>();
-        for (int id : listAllIdToHistory) {
-            if (taskList.containsKey(id)) {
-                history.add(taskList.get(id));
-            } else if (epicList.containsKey(id)) {
-                history.add(epicList.get(id));
-            } else if (subTaskList.containsKey(id)) {
-                history.add(subTaskList.get(id));
-            }
-        }
-        return history;
-    }
-
-    public void checkSizeListAllId(){
-        if (listAllIdToHistory.size() > 10){
-            listAllIdToHistory.remove(0);
-        }
+        return historyManager.getHistory();
     }
 
     @Override
     public void printHistory(){
         System.out.println("История просмотров");
-        for (Task task : getHistory()) {
+        for (Task task : historyManager.getHistory()) {
             System.out.println(task);
         }
     }
+
 }
