@@ -52,4 +52,6 @@ public interface TaskManager {
     void printAllTask();
 
     List<Task> getHistory();
+
+    void printHistory();
 }

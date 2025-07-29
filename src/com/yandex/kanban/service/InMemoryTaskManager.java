@@ -13,11 +13,13 @@ public class InMemoryTaskManager implements TaskManager {
     private HashMap<Integer, Epic> epicList;
     private HashMap<Integer, SubTask> subTaskList;
     private int taskManagerID = 0;
+    private  List<Integer> listAllIdToHistory;
 
     public InMemoryTaskManager() {
         taskList = new HashMap<>();
         epicList = new HashMap<>();
         subTaskList = new HashMap<>();
+        listAllIdToHistory = new ArrayList<>();
     }
 
     @Override
@@ -40,6 +42,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
+        listAllIdToHistory.add(id);
+        checkSizeListAllId();
         return taskList.get(id);
     }
 
@@ -82,6 +86,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public SubTask getSubTaskById(int id){
+        listAllIdToHistory.add(id);
+        checkSizeListAllId();
         return subTaskList.get(id);
     }
 
@@ -123,6 +129,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic getEpicById(int id){
+        listAllIdToHistory.add(id);
+        checkSizeListAllId();
         return epicList.get(id);
     }
 
@@ -199,7 +207,31 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Task> getHistory(){
+    public List<Task> getHistory() {
+        List<Task> history = new ArrayList<>();
+        for (int id : listAllIdToHistory) {
+            if (taskList.containsKey(id)) {
+                history.add(taskList.get(id));
+            } else if (epicList.containsKey(id)) {
+                history.add(epicList.get(id));
+            } else if (subTaskList.containsKey(id)) {
+                history.add(subTaskList.get(id));
+            }
+        }
+        return history;
+    }
 
+    public void checkSizeListAllId(){
+        if (listAllIdToHistory.size() > 10){
+            listAllIdToHistory.remove(0);
+        }
+    }
+
+    @Override
+    public void printHistory(){
+        System.out.println("История просмотров");
+        for (Task task : getHistory()) {
+            System.out.println(task);
+        }
     }
 }
