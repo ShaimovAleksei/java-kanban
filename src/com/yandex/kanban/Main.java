@@ -4,6 +4,7 @@ import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
+import com.yandex.kanban.service.InMemoryTaskManager;
 import com.yandex.kanban.service.TaskManager;
 
 public class Main {
@@ -13,7 +14,7 @@ public class Main {
         Task task1 = new Task("ремонт","Ремонт в комнате");
         Task task2 = new Task("покупка","покупка мебели");
 
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = new InMemoryTaskManager();
         taskManager.createTask(task1);
         taskManager.createTask(task2);
 
