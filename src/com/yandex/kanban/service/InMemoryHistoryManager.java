@@ -13,8 +13,11 @@ public class InMemoryHistoryManager implements HistoryManager{
 
     @Override
     public void add(Task task) {
+        Task copy = new Task(task.getName(), task.getDescription());
+        copy.setId(task.getId());
+        copy.setTaskStatus(task.getTaskStatus());
 
-        history.add(task);
+        history.add(copy);
         checkHistorySyze();
     }
 

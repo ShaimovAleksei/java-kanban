@@ -21,7 +21,11 @@ public class SubTask extends Task {
         return epicID;
     }
 
-    public void setEpicID(int epicID) {
+    public boolean setEpicID(int epicID) {
+        if (epicID == this.getId()) {
+            return false;
+        }
         this.epicID = epicID;
+        return true;
     }
 }

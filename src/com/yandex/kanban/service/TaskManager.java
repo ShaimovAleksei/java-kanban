@@ -23,7 +23,7 @@ public interface TaskManager {
 
     ArrayList<SubTask> getAllSubTask();
 
-    void createSubTask(SubTask subTask);
+    boolean createSubTask(SubTask subTask);
 
     void deleteAllSubTask();
 
