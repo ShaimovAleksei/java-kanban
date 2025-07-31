@@ -7,9 +7,11 @@ import com.yandex.kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedList;
 
 public class InMemoryHistoryManager implements HistoryManager{
-    private List<Task> history = new ArrayList<>();
+    private  LinkedList<Task> history = new LinkedList<>();
+    private static final int MAX_SIZE = 10;
 
     @Override
     public void add(Task task) {
@@ -18,18 +20,18 @@ public class InMemoryHistoryManager implements HistoryManager{
         copy.setTaskStatus(task.getTaskStatus());
 
         history.add(copy);
-        checkHistorySyze();
+        checkHistorySize();
     }
 
-    void checkHistorySyze(){
-        if (history.size() > 10) {
+    void checkHistorySize(){
+        if (history.size() > MAX_SIZE) {
             history.remove(0);
         }
     }
 
     @Override
     public List<Task> getHistory() {
-        return history;
+        return new ArrayList<>(history);
     }
 
     public void printHistory() {
