@@ -12,8 +12,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 
-public class InMemoryHistoryManager implements HistoryManager{
-    private  Map<Integer, Node> history = new HashMap<>();
+public class InMemoryHistoryManager implements HistoryManager {
+    private Map<Integer, Node> history = new HashMap<>();
     private Node head;
     private Node tail;
 
@@ -32,7 +32,6 @@ public class InMemoryHistoryManager implements HistoryManager{
             removeNode(node);
         }
     }
-
 
 
     @Override

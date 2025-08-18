@@ -25,7 +25,7 @@ public class Epic extends Task {
         this.subTaskIDs = subTaskID;
     }
 
-    public boolean addSubTaskID(int id){
+    public boolean addSubTaskID(int id) {
         if (id == this.getId()) {
             return false;
         }
