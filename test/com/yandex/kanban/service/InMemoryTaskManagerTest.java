@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.util.List;
+
 class InMemoryTaskManagerTest {
     private TaskManager manager;
 
@@ -41,6 +43,48 @@ class InMemoryTaskManagerTest {
         subTask.setId(epic.getId());
 
         assertFalse(manager.createSubTask(subTask));
+    }
+
+    @Test
+    void shouldRemoveSubTaskFromEpicWhenDeleted() {
+        Epic epic = new Epic("Путешествие", "Египет");
+        manager.createEpic(epic);
+
+        SubTask subTask = new SubTask("Купить", "Билет", epic.getId());
+        subTask.setId(1);
+        manager.createSubTask(subTask);
+
+        List<Integer> epicSubTasks = manager.getEpicById(epic.getId()).getSubTaskID();
+        assertEquals(1, epicSubTasks.size());
+        assertEquals(subTask.getId(), epicSubTasks.get(0));
+
+        manager.deleteSubTaskById(subTask.getId());
+
+        assertTrue(manager.getEpicById(epic.getId()).getSubTaskID().isEmpty());
+    }
+
+    @Test
+    void shouldRemoveSubTasksWhenEpicDeleted() {
+        Epic epic = new Epic("Путешествие", "Египет");
+        manager.createEpic(epic);
+
+        SubTask subTask = new SubTask("Купить", "Билет", epic.getId());
+        manager.createSubTask(subTask);
+
+        manager.deleteEpicById(epic.getId());
+
+        assertNull(manager.getSubTaskById(subTask.getId()));
+    }
+
+    @Test
+    void shouldNotKeepDeletedTasksInHistory() {
+        Task task = new Task("Путешествие", "Египет");
+        manager.createTask(task);
+        manager.getTaskById(task.getId());
+
+        manager.deleteTaskById(task.getId());
+
+        assertFalse(manager.getHistory().contains(task));
     }
 
 }
