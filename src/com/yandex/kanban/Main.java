@@ -3,14 +3,9 @@ package com.yandex.kanban;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
-import com.yandex.kanban.model.TaskStatus;
-import com.yandex.kanban.service.InMemoryTaskManager;
 import com.yandex.kanban.service.Managers;
-import com.yandex.kanban.service.InMemoryHistoryManager;
 import com.yandex.kanban.service.TaskManager;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
 
