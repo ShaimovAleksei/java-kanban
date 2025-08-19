@@ -1,5 +1,6 @@
 package com.yandex.kanban.service;
 
+import com.yandex.kanban.model.TaskType;
 import com.yandex.kanban.service.Managers;
 import com.yandex.kanban.service.TaskManager;
 import com.yandex.kanban.model.Task;
@@ -21,7 +22,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldAddAndFindDifferentTaskTypes() {
-        Task task = new Task("Покупка", "Мебель");
+        Task task = new Task("Покупка", "Мебель", TaskType.TASK);
         Epic epic = new Epic("Путешествие", "Египет");
         SubTask subTask = new SubTask("Купить", "Билет", 1);
 
@@ -78,7 +79,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldNotKeepDeletedTasksInHistory() {
-        Task task = new Task("Путешествие", "Египет");
+        Task task = new Task("Путешествие", "Египет", TaskType.TASK);
         manager.createTask(task);
         manager.getTaskById(task.getId());
 

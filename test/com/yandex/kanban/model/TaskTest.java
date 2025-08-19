@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class TaskTest {
     @Test
     void tasksWithSameIdShouldBeEqual() {
-        Task task1 = new Task("Покупка", "Мебель");
+        Task task1 = new Task("Покупка", "Мебель", TaskType.TASK);
         task1.setId(1);
 
-        Task task2 = new Task("Покупка", "Мебель на кухню");
+        Task task2 = new Task("Покупка", "Мебель на кухню", TaskType.TASK);
         task2.setId(1);
 
         assertEquals(task1, task2);
@@ -19,7 +19,7 @@ class TaskTest {
 
     @Test
     void taskShouldNotChangeAfterAddingToManager() {
-        Task task1 = new Task("Покупка", "Мебель");
+        Task task1 = new Task("Покупка", "Мебель", TaskType.TASK);
         TaskManager manager = Managers.getDefault();
 
         manager.createTask(task1);

@@ -1,9 +1,6 @@
 package com.yandex.kanban.service;
 
-import com.yandex.kanban.model.Task;
-import com.yandex.kanban.model.Epic;
-import com.yandex.kanban.model.SubTask;
-import com.yandex.kanban.model.TaskStatus;
+import com.yandex.kanban.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +19,7 @@ class InMemoryHistoryManagerTest {
     @Test
     void shouldPreserveTaskVersionInHistory() {
         HistoryManager history = Managers.getDefaultHistory();
-        Task task1 = new Task("Покупка", "Мебель");
+        Task task1 = new Task("Покупка", "Мебель", TaskType.TASK);
         task1.setId(1);
         task1.setTaskStatus(TaskStatus.IN_PROGRESS);
 
@@ -36,7 +33,7 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void shouldAddTaskToHistory() {
-        Task task = new Task("Покупка", "Мебель");
+        Task task = new Task("Покупка", "Мебель", TaskType.TASK);
         task.setId(1);
         historyManager.add(task);
 
@@ -47,7 +44,7 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void shouldRemoveTaskFromHistory() {
-        Task task = new Task("Покупка", "Мебель");
+        Task task = new Task("Покупка", "Мебель", TaskType.TASK);
         task.setId(1);
         historyManager.add(task);
         historyManager.remove(1);
@@ -57,7 +54,7 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void shouldNotContainDuplicates() {
-        Task task = new Task("Покупка", "Мебель");
+        Task task = new Task("Покупка", "Мебель", TaskType.TASK);
         task.setId(1);
 
         historyManager.add(task);
@@ -69,8 +66,8 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void shouldMaintainInsertionOrder() {
-        Task task1 = new Task("Покупка", "Мебель");
-        Task task2 = new Task("Покупка1", "Билет");
+        Task task1 = new Task("Покупка", "Мебель", TaskType.TASK);
+        Task task2 = new Task("Покупка1", "Билет", TaskType.TASK);
         task1.setId(1);
         task2.setId(2);
 
