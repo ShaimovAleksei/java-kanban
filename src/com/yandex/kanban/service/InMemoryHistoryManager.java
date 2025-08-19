@@ -3,7 +3,7 @@ package com.yandex.kanban.service;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
-import com.yandex.kanban.model.Node;
+import com.yandex.kanban.model.TaskType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +11,27 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class InMemoryHistoryManager implements HistoryManager {
+    private static class Node {
+        Task task;
+        Node prev;
+        Node next;
+
+        Node(Task task, Node prev, Node next) {
+            this.task = task;
+            this.prev = prev;
+            this.next = next;
+        }
+    }
+
     private Map<Integer, Node> history = new HashMap<>();
     private Node head;
     private Node tail;
+
+    public InMemoryHistoryManager() {
+        head = new Node(null, null, null);
+        tail = new Node(null, head, null);
+        head.next = tail;
+    }
 
     @Override
     public void add(Task task) {
@@ -35,8 +53,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public List<Task> getHistory() {
         List<Task> history = new ArrayList<>();
-        Node current = head;
-        while (current != null) {
+        Node current = head.next;
+        while (current != tail) {
             history.add(current.task);
             current = current.next;
         }
@@ -45,51 +63,37 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private void linkLast(Task task) {
         Task copy = copyTask(task);
-        Node newNode = new Node(copy, tail, null);
+        Node newNode = new Node(copy, tail.prev, tail);
 
-        if (tail == null) {
-            head = newNode;
-        } else {
-            tail.next = newNode;
-        }
-        tail = newNode;
+        tail.prev.next = newNode;
+        tail.prev = newNode;
 
         history.put(copy.getId(), newNode);
     }
 
     private void removeNode(Node node) {
-        if (node.prev != null) {
-            node.prev.next = node.next;
-        } else {
-            head = node.next;
-        }
-
-        if (node.next != null) {
-            node.next.prev = node.prev;
-        } else {
-            tail = node.prev;
-        }
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
     }
 
     private Task copyTask(Task task) {
-        if (task instanceof Epic) {
-            Epic epic = (Epic) task;
-            Epic copy = new Epic(epic.getName(), epic.getDescription());
-            copy.setId(epic.getId());
-            copy.setTaskStatus(epic.getTaskStatus());
-            return copy;
-        } else if (task instanceof SubTask) {
-            SubTask subTask = (SubTask) task;
-            SubTask copy = new SubTask(subTask.getName(), subTask.getDescription(), subTask.getEpicID());
-            copy.setId(subTask.getId());
-            copy.setTaskStatus(subTask.getTaskStatus());
-            return copy;
-        } else {
-            Task copy = new Task(task.getName(), task.getDescription());
-            copy.setId(task.getId());
-            copy.setTaskStatus(task.getTaskStatus());
-            return copy;
+        Task copy;
+        switch (task.getTaskType()) {
+            case EPIC:
+                Epic epic = (Epic) task;
+                copy = new Epic(epic.getName(), epic.getDescription());
+                break;
+            case SUBTASK:
+                SubTask subTask = (SubTask) task;
+                copy = new SubTask(subTask.getName(), subTask.getDescription(), subTask.getEpicID());
+                break;
+            default:
+                copy = new Task(task.getName(), task.getDescription(), TaskType.TASK);
         }
+
+        copy.setId(task.getId());
+        copy.setTaskStatus(task.getTaskStatus());
+        return copy;
     }
 
     public void printHistory() {

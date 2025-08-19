@@ -3,6 +3,7 @@ package com.yandex.kanban;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
+import com.yandex.kanban.model.TaskType;
 import com.yandex.kanban.service.Managers;
 import com.yandex.kanban.service.TaskManager;
 
@@ -14,8 +15,8 @@ public class Main {
 
         TaskManager manager = Managers.getDefault();
 
-        Task task1 = new Task("Встреча", "Встретить заказсчика");
-        Task task2 = new Task("Тренировка", "Сходить в зал");
+        Task task1 = new Task("Встреча", "Встретить заказсчика", TaskType.TASK);
+        Task task2 = new Task("Тренировка", "Сходить в зал", TaskType.TASK);
         manager.createTask(task1);
         manager.createTask(task2);
 
