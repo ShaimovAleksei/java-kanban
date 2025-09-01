@@ -4,14 +4,15 @@ import java.util.Objects;
 
 public class Task {
     private String name;
-    private  String description;
+    private String description;
     private int id;
     private TaskStatus taskStatus;
+    private TaskType taskType;
 
-    public Task(String name, String description) {
+    public Task(String name, String description, TaskType taskType) {
         this.name = name;
         this.description = description;
-
+        this.taskType = taskType;
         this.taskStatus = TaskStatus.NEW;
     }
 
@@ -21,6 +22,10 @@ public class Task {
 
     public String getDescription() {
         return description;
+    }
+
+    public TaskType getTaskType() {
+        return taskType;
     }
 
     public int getId() {

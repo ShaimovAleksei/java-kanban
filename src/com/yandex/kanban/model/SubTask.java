@@ -3,8 +3,8 @@ package com.yandex.kanban.model;
 public class SubTask extends Task {
     private int epicID;
 
-    public  SubTask(String name, String description, int epicID){
-        super(name, description);
+    public SubTask(String name, String description, int epicID) {
+        super(name, description, TaskType.SUBTASK);
         this.epicID = epicID;
 
     }
