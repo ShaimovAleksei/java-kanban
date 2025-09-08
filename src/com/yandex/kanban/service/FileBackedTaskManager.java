@@ -6,6 +6,8 @@ import java.io.*;
 import java.nio.file.Files;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
+    private static final String CSV_HEADER = "id,type,name,status,description,epic";
+
     private final File file;
 
     public FileBackedTaskManager(File file) {
@@ -14,47 +16,27 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     protected void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write("id,type,name,status,description,epic");
+            writer.write(CSV_HEADER);
             writer.newLine();
 
             for (Task task : getAllTask()) {
-                writer.write(toString(task));
+                writer.write(task.toString());
                 writer.newLine();
             }
 
             for (Epic epic : getAllEpic()) {
-                writer.write(toString(epic));
+                writer.write(epic.toString());
                 writer.newLine();
             }
 
             for (SubTask subTask : getAllSubTask()) {
-                writer.write(toString(subTask));
+                writer.write(subTask.toString());
                 writer.newLine();
             }
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения в файл", e);
         }
-    }
-
-    private String toString(Task task) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(task.getId()).append(",");
-        sb.append(task.getTaskType()).append(",");
-        sb.append(task.getName()).append(",");
-        sb.append(task.getTaskStatus()).append(",");
-        sb.append(task.getDescription()).append(",");
-
-        switch (task.getTaskType()) {
-            case SUBTASK:
-                sb.append(((SubTask) task).getEpicID());
-                break;
-            case TASK:
-            case EPIC:
-                break;
-        }
-
-        return sb.toString();
     }
 
     private Task fromString(String value) {
@@ -96,34 +78,27 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
 
-        try {
-            String content = Files.readString(file.toPath());
-            String[] lines = content.split("\n");
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
-            for (int i = 1; i < lines.length; i++) {
-                String line = lines[i].trim();
-                if (line.isEmpty()) continue;
+            String line = reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+                if (line.isEmpty()) {
+                    break;
+                }
 
                 Task task = manager.fromString(line);
                 if (task != null) {
                     switch (task.getTaskType()) {
                         case TASK:
-                            manager.taskList.put(task.getId(), task);
+                            manager.addTaskWithoutSaving(task);
                             break;
                         case EPIC:
-                            manager.epicList.put(task.getId(), (Epic) task);
+                            manager.addEpicWithoutSaving((Epic) task);
                             break;
                         case SUBTASK:
-                            manager.subTaskList.put(task.getId(), (SubTask) task);
-                            Epic epic = manager.epicList.get(((SubTask) task).getEpicID());
-                            if (epic != null) {
-                                epic.addSubTaskID(task.getId());
-                            }
+                            manager.addSubtaskWithoutSaving((SubTask) task);
                             break;
-                    }
-
-                    if (task.getId() >= manager.taskManagerID) {
-                        manager.taskManagerID = task.getId() + 1;
                     }
                 }
             }
@@ -134,6 +109,33 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         return manager;
     }
+
+    private void addTaskWithoutSaving(Task task) {
+        taskList.put(task.getId(), task);
+        if (task.getId() >= taskManagerID) {
+            taskManagerID = task.getId() + 1;
+        }
+    }
+
+    private void addEpicWithoutSaving(Epic epic) {
+        epicList.put(epic.getId(), epic);
+        if (epic.getId() >= taskManagerID) {
+            taskManagerID = epic.getId() + 1;
+        }
+    }
+
+    private void addSubtaskWithoutSaving(SubTask subTask) {
+        subTaskList.put(subTask.getId(), subTask);
+        if (subTask.getId() >= taskManagerID) {
+            taskManagerID = subTask.getId() + 1;
+        }
+
+        Epic epic = epicList.get(subTask.getEpicID());
+        if (epic != null) {
+            epic.addSubTaskID(subTask.getId());
+        }
+    }
+
 
     @Override
     public void createTask(Task task) {
@@ -210,30 +212,4 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    public static void main(String[] args) {
-        try {
-            File tempFile = File.createTempFile("tasks", ".csv");
-
-            FileBackedTaskManager manager = new FileBackedTaskManager(tempFile);
-
-            Task task1 = new Task("Уборка", "Зал", TaskType.TASK);
-            manager.createTask(task1);
-
-            Epic epic1 = new Epic("Отпуск", "Египет");
-            manager.createEpic(epic1);
-
-            SubTask subTask1 = new SubTask("Покупка", "Билеты", epic1.getId());
-            manager.createSubTask(subTask1);
-
-            FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
-
-            System.out.println("Оригинальные задачи: " + manager.getAllTask().size());
-            System.out.println("Загруженные задачи: " + loadedManager.getAllTask().size());
-
-            tempFile.delete();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

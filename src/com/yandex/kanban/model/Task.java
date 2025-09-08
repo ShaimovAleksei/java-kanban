@@ -50,12 +50,12 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", id=" + id +
-                ", taskStatus=" + taskStatus +
-                '}';
+        return String.format("%d,%s,%s,%s,%s,",
+                id,
+                taskType,
+                name,
+                taskStatus,
+                description);
     }
 
     public void setName(String name) {

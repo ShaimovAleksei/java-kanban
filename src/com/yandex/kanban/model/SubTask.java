@@ -9,12 +9,15 @@ public class SubTask extends Task {
 
     }
 
-
     @Override
     public String toString() {
-        return "SubTask{" +
-                "epicID=" + epicID +
-                "} " + super.toString();
+        return String.format("%d,%s,%s,%s,%s,%d",
+                getId(),
+                getTaskType(),
+                getName(),
+                getTaskStatus(),
+                getDescription(),
+                epicID);
     }
 
     public int getEpicID() {
