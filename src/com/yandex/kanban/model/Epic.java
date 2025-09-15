@@ -12,9 +12,12 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{" +
-                "subTaskID=" + subTaskIDs +
-                "} " + super.toString();
+        return String.format("%d,%s,%s,%s,%s,",
+                getId(),
+                getTaskType(),
+                getName(),
+                getTaskStatus(),
+                getDescription());
     }
 
     public ArrayList<Integer> getSubTaskID() {
