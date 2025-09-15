@@ -110,29 +110,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void addTaskWithoutSaving(Task task) {
-        taskList.put(task.getId(), task);
-        if (task.getId() >= taskManagerID) {
-            taskManagerID = task.getId() + 1;
-        }
+        super.createTask(task);
     }
 
     private void addEpicWithoutSaving(Epic epic) {
-        epicList.put(epic.getId(), epic);
-        if (epic.getId() >= taskManagerID) {
-            taskManagerID = epic.getId() + 1;
-        }
+        super.createEpic(epic);
     }
 
     private void addSubtaskWithoutSaving(SubTask subTask) {
-        subTaskList.put(subTask.getId(), subTask);
-        if (subTask.getId() >= taskManagerID) {
-            taskManagerID = subTask.getId() + 1;
-        }
-
-        Epic epic = epicList.get(subTask.getEpicID());
-        if (epic != null) {
-            epic.addSubTaskID(subTask.getId());
-        }
+        super.createSubTask(subTask);
     }
 
 
