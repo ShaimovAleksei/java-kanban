@@ -3,9 +3,11 @@ package com.yandex.kanban.service;
 import com.yandex.kanban.model.*;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    private static final String CSV_HEADER = "id,type,name,status,description,epic";
+    private static final String CSV_HEADER = "id,type,name,status,description,duration,startTime,epic";
 
     private final File file;
 
@@ -50,20 +52,32 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
 
+        // Обработка новых полей
+        Duration duration = Duration.ZERO;
+        LocalDateTime startTime = null;
+
+        if (parts.length > 5 && !parts[5].equals("null")) {
+            duration = Duration.ofMinutes(Long.parseLong(parts[5]));
+        }
+
+        if (parts.length > 6 && !parts[6].equals("null")) {
+            startTime = LocalDateTime.parse(parts[6]);
+        }
+
         Task task;
         switch (type) {
             case TASK:
-                task = new Task(name, description, type);
+                task = new Task(name, description, type, duration, startTime);
                 break;
             case EPIC:
                 task = new Epic(name, description);
                 break;
             case SUBTASK:
-                if (parts.length < 6) {
+                if (parts.length < 8) {
                     return null;
                 }
-                int epicId = Integer.parseInt(parts[5]);
-                task = new SubTask(name, description, epicId);
+                int epicId = Integer.parseInt(parts[7]);
+                task = new SubTask(name, description, epicId, duration, startTime);
                 break;
             default:
                 return null;

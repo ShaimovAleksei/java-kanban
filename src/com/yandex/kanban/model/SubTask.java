@@ -1,5 +1,8 @@
 package com.yandex.kanban.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class SubTask extends Task {
     private int epicID;
 
@@ -9,14 +12,21 @@ public class SubTask extends Task {
 
     }
 
+    public SubTask(String name, String description, int epicID, Duration duration, LocalDateTime startTime) {
+        super(name, description, TaskType.SUBTASK, duration, startTime);
+        this.epicID = epicID;
+    }
+
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s,%d",
+        return String.format("%d,%s,%s,%s,%s,%s,%s,%d",
                 getId(),
                 getTaskType(),
                 getName(),
                 getTaskStatus(),
                 getDescription(),
+                getDuration().toMinutes(),
+                getStartTime() != null ? getStartTime().toString() : "null",
                 epicID);
     }
 
