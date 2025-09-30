@@ -36,7 +36,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка сохранения в файл", e);
+            throw new ManagerSaveException("Ошибка сохранения в файл ", e);
         }
     }
 
