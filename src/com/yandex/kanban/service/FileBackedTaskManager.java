@@ -52,7 +52,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
 
-        // Обработка новых полей
         Duration duration = Duration.ZERO;
         LocalDateTime startTime = null;
 

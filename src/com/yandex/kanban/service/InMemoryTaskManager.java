@@ -138,7 +138,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean createSubTask(SubTask subTask) {
-        if (subTask == null || subTask.getEpicID() == subTask.getId()) {
+        if (subTask == null) {
             return false;
         }
 
@@ -147,13 +147,17 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
 
-        if (hasTimeOverlapWithAllTasks(subTask)) {
-            throw new ManagerSaveException("Подзадача пересекается по времени с существующей задачей");
+        subTask.setId(taskManagerID++);
+
+        if (subTask.getEpicID() == subTask.getId()) {
+            return false;
         }
 
-        subTask.setId(taskManagerID++);
-        subTaskList.put(subTask.getId(), subTask);
+         if (hasTimeOverlapWithAllTasks(subTask)) {
+             throw new ManagerSaveException("Подзадача пересекается по времени с существующей задачей");
+         }
 
+        subTaskList.put(subTask.getId(), subTask);
         epic.addSubTaskID(subTask.getId());
 
         updateEpicStatus(subTask.getEpicID());

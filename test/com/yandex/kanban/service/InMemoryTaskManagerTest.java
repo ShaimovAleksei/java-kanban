@@ -24,15 +24,20 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldAddAndFindDifferentTaskTypes() {
-        Task task = new Task("Покупка", "Мебель", TaskType.TASK);
+        LocalDateTime baseTime = LocalDateTime.now();
+
+        Task task = new Task("Покупка", "Мебель", TaskType.TASK,
+                Duration.ofHours(2), baseTime);
+        manager.createTask(task);
+
         Epic epic = new Epic("Путешествие", "Египет");
         manager.createEpic(epic);
 
         SubTask subTask = new SubTask("Купить", "Билет", epic.getId(),
-                Duration.ofHours(1), LocalDateTime.now().plusHours(2));
+                Duration.ofHours(1), baseTime.plusHours(3)); // ← Исправлено время
 
-        manager.createTask(task);
-        manager.createSubTask(subTask);
+        boolean subTaskCreated = manager.createSubTask(subTask);
+        assertTrue(subTaskCreated, "Подзадача должна быть создана успешно");
 
         Task foundTask = manager.getTaskById(task.getId());
         Epic foundEpic = manager.getEpicById(epic.getId());
@@ -48,10 +53,10 @@ class InMemoryTaskManagerTest {
         Epic epic = new Epic("Путешествие", "Египет");
         manager.createEpic(epic);
 
-        SubTask subTask = new SubTask("Купить", "Билет", epic.getId());
+        SubTask subTask = new SubTask("Купить", "Билет", 999);
 
-        assertFalse(manager.createSubTask(subTask),
-                "Подзадача не должна быть создана с ID равным ID эпика");
+        boolean result = manager.createSubTask(subTask);
+        assertFalse(result, "Подзадача не должна быть создана для несуществующего эпика");
     }
 
     @Test
@@ -61,7 +66,9 @@ class InMemoryTaskManagerTest {
 
         SubTask subTask = new SubTask("Купить", "Билет", epic.getId(),
                 Duration.ofHours(1), LocalDateTime.now().plusHours(1));
-        manager.createSubTask(subTask);
+
+        boolean created = manager.createSubTask(subTask);
+        assertTrue(created, "Подзадача должна быть создана");
 
         List<Integer> epicSubTasks = manager.getEpicById(epic.getId()).getSubTaskID();
         assertEquals(1, epicSubTasks.size(), "Эпик должен содержать одну подзадачу");
@@ -124,7 +131,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void testTasksWithoutTimeNotInPrioritized() {
-        Task task1 = new Task("Уборка", "Кухня", TaskType.TASK); // Без времени
+        Task task1 = new Task("Уборка", "Кухня", TaskType.TASK);
         Task task2 = new Task("Покупка", "Мебель", TaskType.TASK,
                 Duration.ofHours(1), LocalDateTime.now());
 

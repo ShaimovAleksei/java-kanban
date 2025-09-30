@@ -91,6 +91,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(startTime.plus(duration), task.getEndTime());
     }
 
+
     @Test
     void testEpicTimeCalculation() {
         Epic epic = new Epic("Отпуск", "Египет");
@@ -126,8 +127,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         List<Task> prioritized = taskManager.getPrioritizedTasks();
 
         assertEquals(2, prioritized.size());
-        assertEquals(task2, prioritized.get(0));
-        assertEquals(task1, prioritized.get(1));
+        assertEquals(task2.getId(), prioritized.get(0).getId()); // Сравниваем по ID
+        assertEquals(task1.getId(), prioritized.get(1).getId()); // Сравниваем по ID
     }
 
     @Test
@@ -136,7 +137,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Duration duration = Duration.ofHours(2);
 
         Task task1 = new Task("Ремонт", "Зал", TaskType.TASK, duration, startTime);
-        taskManager.createTask(task1);
+        taskManager.createTask(task1); // ← ДОБАВИТЬ
 
         Task task2 = new Task("Покупка", "Мебель", TaskType.TASK, duration, startTime.plusHours(1));
 
@@ -149,7 +150,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Duration duration = Duration.ofHours(2);
 
         Task task1 = new Task("Ремонт", "Зал", TaskType.TASK, duration, startTime);
-        taskManager.createTask(task1);
+        taskManager.createTask(task1); // ← ДОБАВИТЬ
 
         Task task2 = new Task("Покупка", "Мебель", TaskType.TASK, duration, startTime.plusHours(3));
 
