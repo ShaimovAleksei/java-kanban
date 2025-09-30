@@ -63,20 +63,20 @@ public class FileBackedTaskManagerTest {
         manager.createTask(task);
         manager.createSubTask(subTask);
 
-        assertEquals(1, manager.getAllTask().size());
-        assertEquals(1, manager.getAllEpic().size());
-        assertEquals(1, manager.getAllSubTask().size());
+        assertEquals(1, manager.getAllTask().size(), "Должна быть одна задача");
+        assertEquals(1, manager.getAllEpic().size(), "Должен быть один эпик");
+        assertEquals(1, manager.getAllSubTask().size(), "Должна быть одна подзадача");
 
         String content = Files.readString(tempFile.toPath());
         String[] lines = content.split("\n");
 
-        assertEquals(4, lines.length); // заголовок + 3 задачи
+        assertEquals(4, lines.length, "Должно быть 4 строки: заголовок + 3 задачи");
         assertEquals("id,type,name,status,description,duration,startTime,epic", lines[0].trim(),
                 "Неверный формат заголовка");
 
-        assertTrue(content.contains("Ремонт"));
-        assertTrue(content.contains("Отпуск"));
-        assertTrue(content.contains("Купить"));
+        assertTrue(content.contains("Ремонт"), "Должна содержать название задачи");
+        assertTrue(content.contains("Отпуск"), "Должна содержать название эпика");
+        assertTrue(content.contains("Купить"), "Должна содержать название подзадачи");
     }
 
     @Test
@@ -98,17 +98,17 @@ public class FileBackedTaskManagerTest {
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
-        assertEquals(1, loadedManager.getAllTask().size());
-        assertEquals(1, loadedManager.getAllEpic().size());
-        assertEquals(1, loadedManager.getAllSubTask().size());
+        assertEquals(1, loadedManager.getAllTask().size(), "Должна быть одна задача");
+        assertEquals(1, loadedManager.getAllEpic().size(), "Должен быть один эпик");
+        assertEquals(1, loadedManager.getAllSubTask().size(), "Должна быть одна подзадача");
 
-        Task loadedTask = loadedManager.getTaskById(0);
-        Epic loadedEpic = loadedManager.getEpicById(1);
-        SubTask loadedSubTask = loadedManager.getSubTaskById(2);
+        Task loadedTask = loadedManager.getAllTask().get(0);
+        Epic loadedEpic = loadedManager.getAllEpic().get(0);
+        SubTask loadedSubTask = loadedManager.getAllSubTask().get(0);
 
-        assertNotNull(loadedTask);
-        assertNotNull(loadedEpic);
-        assertNotNull(loadedSubTask);
+        assertNotNull(loadedTask, "Задача не должна быть null");
+        assertNotNull(loadedEpic, "Эпик не должен быть null");
+        assertNotNull(loadedSubTask, "Подзадача не должна быть null");
 
         assertEquals("Ремонт", loadedTask.getName(), "Название задачи не совпадает");
         assertEquals("Отпуск", loadedEpic.getName(), "Название эпика не совпадает");
@@ -122,8 +122,9 @@ public class FileBackedTaskManagerTest {
         assertEquals(TaskStatus.NEW, loadedEpic.getTaskStatus(), "Статус эпика не совпадает");
         assertEquals(TaskStatus.NEW, loadedSubTask.getTaskStatus(), "Статус подзадачи не совпадает");
 
-        assertEquals(1, loadedSubTask.getEpicID(), "ID эпика в подзадаче не совпадает");
-        assertTrue(loadedEpic.getSubTaskID().contains(2), "Эпик должен содержать ID подзадачи");
+        assertEquals(loadedEpic.getId(), loadedSubTask.getEpicID(), "ID эпика в подзадаче не совпадает");
+        assertTrue(loadedEpic.getSubTaskID().contains(loadedSubTask.getId()),
+                "Эпик должен содержать ID подзадачи");
 
         assertEquals(Duration.ofHours(2), loadedTask.getDuration());
         assertEquals(baseTime, loadedTask.getStartTime());
