@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
-    protected HashMap<Integer, Task> taskList;
-    protected HashMap<Integer, Epic> epicList;
-    protected HashMap<Integer, SubTask> subTaskList;
+    protected Map<Integer, Task> taskList;
+    protected Map<Integer, Epic> epicList;
+    protected Map<Integer, SubTask> subTaskList;
     protected int taskManagerID = 0;
     protected HistoryManager historyManager;
     private final Set<Task> prioritizedTasks;
@@ -24,15 +24,11 @@ public class InMemoryTaskManager implements TaskManager {
         epicList = new HashMap<>();
         subTaskList = new HashMap<>();
         this.historyManager = new InMemoryHistoryManager();
-        this.prioritizedTasks = new TreeSet<>((task1, task2) -> {
-            LocalDateTime time1 = task1.getStartTime();
-            LocalDateTime time2 = task2.getStartTime();
-
-            if (time1 == null && time2 == null) return 0;
-            if (time1 == null) return 1;
-            if (time2 == null) return -1;
-            return time1.compareTo(time2);
-        });
+        this.prioritizedTasks = new TreeSet<>(
+                                Comparator.comparing(Task::getStartTime,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                                .thenComparing(Task::getId)
+        );
     }
 
     public List<Task> getPrioritizedTasks() {
