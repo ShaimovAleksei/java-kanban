@@ -1,9 +1,11 @@
 package com.yandex.kanban.model;
 
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 public class Epic extends Task {
     private ArrayList<Integer> subTaskIDs;
+    private LocalDateTime endTime;
 
     public Epic(String name, String description) {
         super(name, description, TaskType.EPIC);
@@ -11,10 +13,24 @@ public class Epic extends Task {
     }
 
     @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    @Override
     public String toString() {
-        return "Epic{" +
-                "subTaskID=" + subTaskIDs +
-                "} " + super.toString();
+        return String.format("%d,%s,%s,%s,%s,%s,%s",
+                getId(),
+                getTaskType(),
+                getName(),
+                getTaskStatus(),
+                getDescription(),
+                getDuration().toMinutes(),
+                getStartTime() != null ? getStartTime().toString() : "null");
     }
 
     public ArrayList<Integer> getSubTaskID() {
