@@ -14,16 +14,6 @@ public class Epic extends Task {
     }
 
     @Override
-    public Duration getDuration() {
-        return super.getDuration(); // Будет рассчитываться в менеджере
-    }
-
-    @Override
-    public LocalDateTime getStartTime() {
-        return super.getStartTime(); // Будет рассчитываться в менеджере
-    }
-
-    @Override
     public LocalDateTime getEndTime() {
         return endTime;
     }
