@@ -14,7 +14,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<Integer, Task> taskList;
     protected Map<Integer, Epic> epicList;
     protected Map<Integer, SubTask> subTaskList;
-    protected int taskManagerID = 0;
+    protected int taskManagerID = 1;
     protected HistoryManager historyManager;
     private final Set<Task> prioritizedTasks;
 
