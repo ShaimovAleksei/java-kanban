@@ -22,7 +22,8 @@ public abstract class BaseHttpHandler {
 
     protected void sendHasInteractions(HttpExchange h) throws IOException {
         String response = "Task has time intersections";
-        h.sendResponseHeaders(406, response.length());
+        h.getResponseHeaders().add("Content-Type", "text/plain;charset=utf-8");
+        h.sendResponseHeaders(406, response.getBytes().length);
         h.getResponseBody().write(response.getBytes());
         h.close();
     }

@@ -5,6 +5,7 @@ import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.service.exceptions.ManagerSaveException;
+import com.yandex.kanban.service.exceptions.TaskOverlapException;
 
 import java.util.*;
 import java.time.Duration;
@@ -26,9 +27,9 @@ public class InMemoryTaskManager implements TaskManager {
         subTaskList = new HashMap<>();
         this.historyManager = new InMemoryHistoryManager();
         this.prioritizedTasks = new TreeSet<>(
-                                Comparator.comparing(Task::getStartTime,
+                Comparator.comparing(Task::getStartTime,
                                 Comparator.nullsLast(Comparator.naturalOrder()))
-                                .thenComparing(Task::getId)
+                        .thenComparing(Task::getId)
         );
     }
 
@@ -68,7 +69,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void createTask(Task task) {
         if (hasTimeOverlapWithAllTasks(task)) {
-            throw new ManagerSaveException("Задача пересекается по времени с существующей задачей");
+            throw new TaskOverlapException("Задача пересекается по времени с существующей задачей");
         }
 
         task.setId(taskManagerID++);
@@ -116,7 +117,7 @@ public class InMemoryTaskManager implements TaskManager {
 
             if (hasTimeOverlapWithAllTasks(task)) {
                 prioritizedTasks.add(oldTask);
-                throw new ManagerSaveException("Обновленная задача пересекается по времени с существующей задачей");
+                throw new TaskOverlapException("Обновленная задача пересекается по времени с существующей задачей");
             }
 
             taskList.put(task.getId(), task);
@@ -150,9 +151,9 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
 
-         if (hasTimeOverlapWithAllTasks(subTask)) {
-             throw new ManagerSaveException("Подзадача пересекается по времени с существующей задачей");
-         }
+        if (hasTimeOverlapWithAllTasks(subTask)) {
+            throw new TaskOverlapException("Подзадача пересекается по времени с существующей задачей");
+        }
 
         subTaskList.put(subTask.getId(), subTask);
         epic.addSubTaskID(subTask.getId());
@@ -250,7 +251,7 @@ public class InMemoryTaskManager implements TaskManager {
 
             if (hasTimeOverlapWithAllTasks(subtask)) {
                 prioritizedTasks.add(oldSubTask);
-                throw new ManagerSaveException("Обновленная подзадача пересекается по времени с существующей задачей");
+                throw new TaskOverlapException("Обновленная подзадача пересекается по времени с существующей задачей");
             }
 
             subTaskList.put(subtask.getId(), subtask);
