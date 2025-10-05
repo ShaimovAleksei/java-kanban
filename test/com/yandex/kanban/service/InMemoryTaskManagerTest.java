@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 class InMemoryTaskManagerTest {
     private TaskManager manager;
@@ -22,17 +24,28 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldAddAndFindDifferentTaskTypes() {
-        Task task = new Task("Покупка", "Мебель", TaskType.TASK);
-        Epic epic = new Epic("Путешествие", "Египет");
-        SubTask subTask = new SubTask("Купить", "Билет", 1);
+        LocalDateTime baseTime = LocalDateTime.now();
 
+        Task task = new Task("Покупка", "Мебель", TaskType.TASK,
+                Duration.ofHours(2), baseTime);
         manager.createTask(task);
-        manager.createEpic(epic);
-        manager.createSubTask(subTask);
 
-        assertNotNull(manager.getTaskById(task.getId()));
-        assertNotNull(manager.getEpicById(epic.getId()));
-        assertNotNull(manager.getSubTaskById(subTask.getId()));
+        Epic epic = new Epic("Путешествие", "Египет");
+        manager.createEpic(epic);
+
+        SubTask subTask = new SubTask("Купить", "Билет", epic.getId(),
+                Duration.ofHours(1), baseTime.plusHours(3)); // ← Исправлено время
+
+        boolean subTaskCreated = manager.createSubTask(subTask);
+        assertTrue(subTaskCreated, "Подзадача должна быть создана успешно");
+
+        Task foundTask = manager.getTaskById(task.getId());
+        Epic foundEpic = manager.getEpicById(epic.getId());
+        SubTask foundSubTask = manager.getSubTaskById(subTask.getId());
+
+        assertNotNull(foundTask, "Задача не найдена");
+        assertNotNull(foundEpic, "Эпик не найден");
+        assertNotNull(foundSubTask, "Подзадача не найдена");
     }
 
     @Test
@@ -40,10 +53,10 @@ class InMemoryTaskManagerTest {
         Epic epic = new Epic("Путешествие", "Египет");
         manager.createEpic(epic);
 
-        SubTask subTask = new SubTask("Купить", "Билет", epic.getId());
-        subTask.setId(epic.getId());
+        SubTask subTask = new SubTask("Купить", "Билет", 999);
 
-        assertFalse(manager.createSubTask(subTask));
+        boolean result = manager.createSubTask(subTask);
+        assertFalse(result, "Подзадача не должна быть создана для несуществующего эпика");
     }
 
     @Test
@@ -51,17 +64,21 @@ class InMemoryTaskManagerTest {
         Epic epic = new Epic("Путешествие", "Египет");
         manager.createEpic(epic);
 
-        SubTask subTask = new SubTask("Купить", "Билет", epic.getId());
-        subTask.setId(1);
-        manager.createSubTask(subTask);
+        SubTask subTask = new SubTask("Купить", "Билет", epic.getId(),
+                Duration.ofHours(1), LocalDateTime.now().plusHours(1));
+
+        boolean created = manager.createSubTask(subTask);
+        assertTrue(created, "Подзадача должна быть создана");
 
         List<Integer> epicSubTasks = manager.getEpicById(epic.getId()).getSubTaskID();
-        assertEquals(1, epicSubTasks.size());
-        assertEquals(subTask.getId(), epicSubTasks.get(0));
+        assertEquals(1, epicSubTasks.size(), "Эпик должен содержать одну подзадачу");
+        assertTrue(epicSubTasks.contains(subTask.getId()),
+                "Эпик должен содержать ID созданной подзадачи");
 
         manager.deleteSubTaskById(subTask.getId());
 
-        assertTrue(manager.getEpicById(epic.getId()).getSubTaskID().isEmpty());
+        assertTrue(manager.getEpicById(epic.getId()).getSubTaskID().isEmpty(),
+                "После удаления подзадачи эпик не должен содержать подзадач");
     }
 
     @Test
@@ -69,23 +86,61 @@ class InMemoryTaskManagerTest {
         Epic epic = new Epic("Путешествие", "Египет");
         manager.createEpic(epic);
 
-        SubTask subTask = new SubTask("Купить", "Билет", epic.getId());
+        SubTask subTask = new SubTask("Купить", "Билет", epic.getId(),
+                Duration.ofHours(1), LocalDateTime.now().plusHours(1));
         manager.createSubTask(subTask);
+
+        int subTaskId = subTask.getId();
 
         manager.deleteEpicById(epic.getId());
 
-        assertNull(manager.getSubTaskById(subTask.getId()));
+        assertNull(manager.getSubTaskById(subTaskId),
+                "Подзадача должна быть удалена при удалении эпика");
     }
 
     @Test
     void shouldNotKeepDeletedTasksInHistory() {
-        Task task = new Task("Путешествие", "Египет", TaskType.TASK);
+        Task task = new Task("Путешествие", "Египет", TaskType.TASK,
+                Duration.ofHours(1), LocalDateTime.now());
         manager.createTask(task);
         manager.getTaskById(task.getId());
 
         manager.deleteTaskById(task.getId());
 
-        assertFalse(manager.getHistory().contains(task));
+        assertFalse(manager.getHistory().contains(task),
+                "Удаленная задача не должна оставаться в истории");
     }
 
+    @Test
+    void testPrioritizedTasksOrder() {
+        LocalDateTime now = LocalDateTime.now();
+
+        Task task1 = new Task("Ремонт", "Зал", TaskType.TASK,
+                Duration.ofHours(1), now.plusHours(3));
+        Task task2 = new Task("Покупка", "Мебель", TaskType.TASK,
+                Duration.ofHours(1), now.plusHours(1));
+
+        manager.createTask(task1);
+        manager.createTask(task2);
+
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        assertEquals(2, prioritized.size(), "Должно быть 2 задачи в приоритетном списке");
+        assertEquals(task2.getId(), prioritized.get(0).getId(), "Более ранняя задача должна быть первой");
+        assertEquals(task1.getId(), prioritized.get(1).getId(), "Более поздняя задача должна быть второй");
+    }
+
+    @Test
+    void testTasksWithoutTimeNotInPrioritized() {
+        Task task1 = new Task("Уборка", "Кухня", TaskType.TASK);
+        Task task2 = new Task("Покупка", "Мебель", TaskType.TASK,
+                Duration.ofHours(1), LocalDateTime.now());
+
+        manager.createTask(task1);
+        manager.createTask(task2);
+
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        assertEquals(1, prioritized.size(), "Только задачи со временем должны быть в приоритетном списке");
+        assertEquals(task2.getId(), prioritized.get(0).getId(),
+                "Задача со временем должна быть в приоритетном списке");
+    }
 }
