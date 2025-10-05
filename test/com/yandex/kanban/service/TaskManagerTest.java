@@ -1,7 +1,7 @@
 package com.yandex.kanban.service;
 
 import com.yandex.kanban.model.*;
-import com.yandex.kanban.service.TaskManager;
+import com.yandex.kanban.service.exceptions.ManagerSaveException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;

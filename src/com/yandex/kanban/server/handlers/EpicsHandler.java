@@ -1,9 +1,10 @@
-package com.yandex.kanban.server;
+package com.yandex.kanban.server.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.service.TaskManager;
 
@@ -12,11 +13,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
+public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager taskManager;
     private final Gson gson;
 
-    public SubtasksHandler(TaskManager taskManager, Gson gson) {
+    public EpicsHandler(TaskManager taskManager, Gson gson) {
         this.taskManager = taskManager;
         this.gson = gson;
     }
@@ -48,17 +49,33 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     private void handleGet(HttpExchange exchange, String path) throws IOException {
-        if (path.equals("/subtasks")) {
-            List<SubTask> subtasks = taskManager.getAllSubTask();
-            String response = gson.toJson(subtasks);
+        if (path.equals("/epics")) {
+            List<Epic> epics = taskManager.getAllEpic();
+            String response = gson.toJson(epics);
             sendText(exchange, response);
-        } else if (path.matches("/subtasks/\\d+")) {
+        } else if (path.matches("/epics/\\d+")) {
             String idStr = getPathId(path);
             try {
                 int id = Integer.parseInt(idStr);
-                SubTask subtask = taskManager.getSubTaskById(id);
-                if (subtask != null) {
-                    String response = gson.toJson(subtask);
+                Epic epic = taskManager.getEpicById(id);
+                if (epic != null) {
+                    String response = gson.toJson(epic);
+                    sendText(exchange, response);
+                } else {
+                    sendNotFound(exchange);
+                }
+            } catch (NumberFormatException e) {
+                sendNotFound(exchange);
+            }
+        } else if (path.matches("/epics/\\d+/subtasks")) {
+            String epicPath = path.split("/subtasks")[0];
+            String idStr = getPathId(epicPath);
+            try {
+                int id = Integer.parseInt(idStr);
+                Epic epic = taskManager.getEpicById(id);
+                if (epic != null) {
+                    List<SubTask> subtasks = taskManager.getSubTasksByEpicId(id);
+                    String response = gson.toJson(subtasks);
                     sendText(exchange, response);
                 } else {
                     sendNotFound(exchange);
@@ -76,41 +93,45 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
         String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
         try {
-            SubTask subtask = gson.fromJson(body, SubTask.class);
+            System.out.println("Received JSON: " + body);
 
-            if (subtask.getId() != 0 && taskManager.getSubTaskById(subtask.getId()) != null) {
-                taskManager.updateSubtask(subtask);
-                String response = gson.toJson(subtask);
-                sendText(exchange, response); // 200 OK
-            } else {
-                boolean created = taskManager.createSubTask(subtask);
-                if (created) {
-                    String response = gson.toJson(subtask);
-                    sendCreated(exchange, response); // 201 Created
-                } else {
-                    exchange.sendResponseHeaders(400, -1);
+            Epic epic = gson.fromJson(body, Epic.class);
+            System.out.println("Deserialized epic - ID: " + epic.getId() + ", Name: " + epic.getName());
+
+            if (epic.getId() != 0) {
+                Epic existingEpic = taskManager.getEpicById(epic.getId());
+                System.out.println("Existing epic found: " + (existingEpic != null));
+
+                if (existingEpic != null) {
+                    taskManager.updateEpic(epic);
+                    String response = gson.toJson(epic);
+                    System.out.println("Updating epic, sending 200");
+                    sendText(exchange, response); // 200 OK
+                    return;
                 }
             }
+
+            taskManager.createEpic(epic);
+            String response = gson.toJson(epic);
+            System.out.println("Creating new epic, sending 201");
+            sendCreated(exchange, response); // 201 Created
+
         } catch (JsonSyntaxException e) {
             exchange.sendResponseHeaders(400, -1);
         } catch (Exception e) {
-            if (e.getMessage().contains("пересекается")) {
-                sendHasInteractions(exchange);
-            } else {
-                sendInternalError(exchange);
-            }
+            sendInternalError(exchange);
         }
     }
 
     private void handleDelete(HttpExchange exchange, String path) throws IOException {
-        if (path.matches("/subtasks/\\d+")) {
+        if (path.matches("/epics/\\d+")) {
             String idStr = getPathId(path);
             try {
                 int id = Integer.parseInt(idStr);
-                SubTask subtask = taskManager.getSubTaskById(id);
-                if (subtask != null) {
-                    taskManager.deleteSubTaskById(id);
-                    sendText(exchange, "Subtask deleted");
+                Epic epic = taskManager.getEpicById(id);
+                if (epic != null) {
+                    taskManager.deleteEpicById(id);
+                    sendText(exchange, "Epic deleted");
                 } else {
                     sendNotFound(exchange);
                 }

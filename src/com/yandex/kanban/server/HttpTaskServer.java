@@ -3,6 +3,9 @@ package com.yandex.kanban.server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
+import com.yandex.kanban.server.adapters.DurationAdapter;
+import com.yandex.kanban.server.adapters.LocalDateTimeAdapter;
+import com.yandex.kanban.server.handlers.*;
 import com.yandex.kanban.service.TaskManager;
 
 import java.io.IOException;

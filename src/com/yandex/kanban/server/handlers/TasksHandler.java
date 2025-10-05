@@ -1,4 +1,4 @@
-package com.yandex.kanban.server;
+package com.yandex.kanban.server.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.service.TaskManager;
+import com.yandex.kanban.service.exceptions.TaskOverlapException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,12 +90,10 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
             }
         } catch (JsonSyntaxException e) {
             exchange.sendResponseHeaders(400, -1);
+        } catch (TaskOverlapException e) {
+            sendHasInteractions(exchange);
         } catch (Exception e) {
-            if (e.getMessage().contains("пересекается")) {
-                sendHasInteractions(exchange);
-            } else {
-                sendInternalError(exchange);
-            }
+            sendInternalError(exchange);
         }
     }
 
